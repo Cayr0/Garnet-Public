@@ -1,0 +1,10 @@
+1- Swipe Row em recursos.
+
+
+
+
+
+#TODO
+Colocar Filter funcionando igual a SolicitaçõesPFV no ADM
+Fazer alterações Solicitações(Campo Observações) e Novas SolicitaçõesPFV(Todos os campos)
+Fazer alterações Perfil
