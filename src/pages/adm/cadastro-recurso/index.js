@@ -67,9 +67,10 @@ export default function Cadastro({ navigation: { goBack, navigate } }) {
     Horario();
     BuscarRecursos();
   }, []);
-
+  //Busca no banco e traz os recursos cadastrados
   async function BuscarRecursos() {
     try {
+      //Lib para conectar com o banco
       const res = await apiaxios.get("recursos");
       setData(res.data);
       setIsMemoryData(res.data);
