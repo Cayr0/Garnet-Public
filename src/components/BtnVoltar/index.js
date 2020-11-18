@@ -6,10 +6,14 @@ import styles from './styles';
 
 const BtnVoltar = ({ destino }) => {
 
-  const { navigate } = useNavigation();
+  const { replace, goBack } = useNavigation();
+
+  function handlereplace() {
+    replace(`${destino}`);
+  }
 
   function handlegoback() {
-    navigate(`${destino}`);
+    goBack(`${destino}`);
   }
 
   return (

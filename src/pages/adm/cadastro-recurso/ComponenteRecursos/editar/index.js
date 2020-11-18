@@ -245,7 +245,7 @@ export default function EditarRecurso({ route, navigation }) {
         <View style={styles.btnVoltarView}>
           <TouchableOpacity
             style={styles.btnVoltar}
-            onPress={() => navigation.navigate("Cadastro")}
+            onPress={() => goBack("Cadastro")}
           >
             <Text style={styles.textVoltar}>Voltar</Text>
           </TouchableOpacity>

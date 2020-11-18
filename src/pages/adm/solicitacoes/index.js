@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import io from "socket.io-client";
 import {
   View,
@@ -28,6 +28,7 @@ import apiaxios from "../../../services/apiaxios";
 
 //Components
 import BtnVoltar from "../../../components/BtnVoltar/index";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Solicitacao({ navigation: { goBack, navigate } }) {
   const [solictacoes, setSolicitacoes] = useState([]);
@@ -81,6 +82,13 @@ export default function Solicitacao({ navigation: { goBack, navigate } }) {
       setInMemorySolicitacoes([newSolicitacao, ...inMemorySolicitacoes]);
     });
   }
+
+  useFocusEffect(
+    useCallback(()=>{
+      SearchingTheAPISolicitacoes();
+      return () => SearchingTheAPISolicitacoes();
+    },[]),
+  );
 
   async function SearchingTheAPISolicitacoes() {
     try {
