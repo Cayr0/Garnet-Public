@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import io from "socket.io-client";
 import {
   View,
@@ -25,6 +25,7 @@ import { useUser } from "../../../Context/UserProvider";
 import BtnVoltar from "../../../components/BtnVoltar/index";
 
 import styles from "./styles";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Cadastro({ navigation: { goBack, navigate } }) {
   const { User } = useUser(User);
@@ -40,28 +41,36 @@ export default function Cadastro({ navigation: { goBack, navigate } }) {
   const [pullRefresh, setPullRefresh] = useState(false);
   const [horario, setHorario] = useState("");
 
-  function registerToSocket() {
-    const socket = io(URL);
+  useFocusEffect(
+    useCallback(()=>{
+      BuscarRecursos();
+      return () => BuscarRecursos();
+    },[]),
+  );
 
-    //CreateSolicitacao, UpdateSolicitacao
-    socket.on("CreateRecurso", (newRecurso) => {
-      setData([newRecurso, ...data]);
-      setIsMemoryData([newRecurso, ...isMemoryData]);
-    });
+  // async function registerToSocket() {
+  //   const socket = io(URL);
 
-    socket.on("UpdateRecurso", (updateRecurso) => {
-      setData(
-        data.map((Rec) => {
-          Rec._id === updateRecurso._id ? updateRecurso : Rec;
-        })
-      );
-      setIsMemoryData(data);
-    });
-  }
+  //   //CreateSolicitacao, UpdateSolicitacao
+  //   await socket.on("CreateRecurso", (newRecurso) => {
+  //     console.log(newRecurso);
+  //     setData([newRecurso, ...data]);
+  //     setIsMemoryData([newRecurso, ...isMemoryData]);
+  //   });
 
-  useEffect(() => {
-    registerToSocket();
-  }, [data]);
+  //   await socket.on("UpdateRecurso", (updateRecurso) => {
+  //     setData(
+  //       data.map((Rec) => {
+  //         Rec._id === updateRecurso._id ? updateRecurso : Rec;
+  //       })
+  //     );
+  //     setIsMemoryData(data);
+  //   });
+  // }
+
+  // useEffect(() => {
+  //   registerToSocket();
+  // }, [data]);
 
   useEffect(() => {
     Horario();
@@ -95,11 +104,11 @@ export default function Cadastro({ navigation: { goBack, navigate } }) {
     }
   }
 
-  function onRefresh() {
+  async function onRefresh() {
     //Vai limpar o useState data que está armazenado os Dados da API
     setData([]);
     //Vai obter os dados mais recentes, da API
-    BuscarRecursos();
+    await BuscarRecursos();
   }
 
   function searchList() {

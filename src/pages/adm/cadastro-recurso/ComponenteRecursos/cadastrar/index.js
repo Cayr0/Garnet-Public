@@ -29,6 +29,7 @@ export default function CadastrarRecurso({ navigation }) {
   const [postText, setPostText] = useState("");
   const [qtde, setQtde] = useState("");
 
+  // Função de cadastrar
   async function cadastrar() {
     try {
       var Recursos = {
@@ -38,7 +39,7 @@ export default function CadastrarRecurso({ navigation }) {
         qtde: qtde,
       };
 
-      if (postText && qtde && selectedValue) {
+      if (postText && qtde && selectedValue!="Selecione") {
         const res = await apiaxios.post("recursos", Recursos);
 
         console.log(res.data);
@@ -52,6 +53,20 @@ export default function CadastrarRecurso({ navigation }) {
         setSelectedValue("Selecione");
         setPostText("");
         setQtde("");
+      } else {
+        Alert.alert(
+          "Mensagem",
+          `Falta alguma coisa`,
+          [
+            {
+              text: "Cancel",
+              onPress: () => {},
+              style: "cancel",
+            },
+            { text: "OK", onPress: () => {} },
+          ],
+          { cancelable: false }
+        );
       }
     } catch (error) {
       Alert.alert(
@@ -131,6 +146,7 @@ export default function CadastrarRecurso({ navigation }) {
             </View>
             <View style={styles.ViewInputQT}>
               <TextInput
+                keyboardType="numeric"
                 style={styles.inputQT}
                 value={qtde}
                 autoCorrect={false}

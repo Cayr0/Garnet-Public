@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 import {
   View,
@@ -15,6 +15,8 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
+
+import { CommonActions } from "@react-navigation/native";
 
 import { useUser } from "./Context/UserProvider";
 
@@ -56,7 +58,7 @@ export default function Login({ navigation }) {
           AsyncStorage.setItem("user", JSON.stringify(res.user));
           AsyncStorage.setItem("name", JSON.stringify(res.user.name));
           AsyncStorage.setItem("@token", res.token);
-          const identi = res.user.identific;
+          const identi = res.user.provider;
 
           setTime(false);
           loginIdentific(identi);
@@ -83,12 +85,16 @@ export default function Login({ navigation }) {
       })
       .done(); //Não sei pra que.
   }
+
+  const handleDashboard = (caminho) => {
+    navigation.replace(caminho)
+  }
   //Função para identificar se é professor ou adm
-  function loginIdentific(identi) {
-    if (identi === "1") {
-      navigation.navigate("AdmStack");
+  function loginIdentific(provider) {
+    if (provider === "1") {
+      handleDashboard('AdmStack');
     } else {
-      navigation.navigate("PfvStack");
+      handleDashboard('PfvStack');
     }
   }
 

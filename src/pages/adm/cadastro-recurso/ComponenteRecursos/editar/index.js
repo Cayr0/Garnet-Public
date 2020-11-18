@@ -52,7 +52,7 @@ export default function EditarRecurso({ route, navigation }) {
         qtde: qtde,
       };
 
-      if (postText && qtde && selectedValue) {
+      if (postText && qtde && selectedValue === "Selecione") {
         const res = await apiaxios.put(`recursos/${id}`, Recursos);
 
         console.log(res.data);

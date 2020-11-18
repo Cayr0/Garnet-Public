@@ -29,7 +29,7 @@ export default function Dashboard({ navigation }) {
 
   function Logout() {
     AsyncStorage.clear();
-    navigation.navigate("Login");
+    navigation.replace("Login");
   }
 
   function Horario() {

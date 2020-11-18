@@ -113,7 +113,8 @@ const styles = StyleSheet.create({
   btnheader: {
     flex: 1,
     flexDirection: "row",
-    marginBottom: '3%'
+    marginBottom: '3%',
+    padding: 10,
   },
   BtnBarra: {
     flexDirection: 'row',
@@ -125,11 +126,11 @@ const styles = StyleSheet.create({
   },
   BtnNovo: {
     backgroundColor:'#108B93',
-    width: 157,
+    width: "40%",
   },
   BtnPesquisa: {
     backgroundColor:'#E4E4E4',
-    width: 102,
+    width: "30%",
   },
   textBtn: {
     fontSize: 16,
