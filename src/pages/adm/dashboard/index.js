@@ -1,107 +1,76 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  KeyboardAvoidingView,
-  TouchableOpacity,
-  Image,
-  StatusBar,
-  ScrollView,
-  AsyncStorage,
-} from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { View } from "react-native";
+import { useUser } from "../../../Context/UserProvider";
 
+//Components
+import Header from "../../../components/Header/Header";
+import BotaoPadrao from "../../../components/BotaoPadrao/BotaoPadrao";
+import Background from "../../../components/Background/Background";
+
+//Style
 import styles from "./styles";
 
 export default function Dashboard({ navigation }) {
-  const [Name, setName] = useState("");
-  const [horario, setHorario] = useState("");
-
-  AsyncStorage.getItem("name", (err, result) => {
-    if (result != null) {
-      setName(JSON.parse(result));
-    }
-  });
-
-  useEffect(() => {
-    Horario();
-  }, []);
-
+  const { User, signOut } = useUser();
   function Logout() {
-    AsyncStorage.clear();
+    signOut();
     navigation.replace("Login");
   }
 
-  function Horario() {
-    let d = new Date();
-    let hour = d.getHours();
-    if (hour < 5) {
-      setHorario("Boa Noite");
-    } else if (hour < 8) {
-      setHorario("Bom Dia");
-    } else if (hour < 12) {
-      setHorario("Bom Dia");
-    } else if (hour < 18) {
-      setHorario("Boa tarde");
-    } else {
-      setHorario("Boa noite");
-    }
-  }
 
   return (
-    <ScrollView style={styles.container}>
-      <KeyboardAvoidingView style={styles.container2}>
-        <View style={styles.header}>
-          <Image
-            style={{
-              width: 244,
-              height: 53,
-            }}
-            source={require("../../../assets/logo1.png")}
+    <Background center={true}  >
+      <Header name={User.name} />
+
+
+
+      <View style={styles.ContainerBotoes}>
+        <BotaoPadrao
+          Label="Meu Perfil"
+          BgColor="#087E85"
+          ColorLabel="#fff"
+          IconName="user-alt"
+          marginLeftText={8}
+          OnPress={() => navigation.navigate("Perfil")}
+          marginVertical={5}
+          borderRadius={8}
+        />
+
+        {User.provider === "1" && (
+          <BotaoPadrao
+            Label="Cadastro de Recursos"
+            BgColor="#087E85"
+            ColorLabel="#fff"
+            IconName="cog"
+            marginLeftText={8}
+            OnPress={() => navigation.navigate("Cadastro")}
+            marginVertical={5}
+            borderRadius={8}
           />
+        )}
 
-          <Text style={styles.textHeader}>
-            Gestor Acadêmico Redentor - Itaperuna
-          </Text>
-          <Text style={styles.textHeader2}>
-            {horario}, {Name}
-          </Text>
-        </View>
+        <BotaoPadrao
+          Label="Solicitações de Recursos"
+          BgColor="#087E85"
+          ColorLabel="#fff"
+          IconName="list-ul"
+          marginLeftText={8}
+          OnPress={() => navigation.navigate("Solicitacao")}
+          marginVertical={5}
+          borderRadius={8}
+        />
 
-        <View style={styles.btnDashboard}>
-          <TouchableOpacity
-            style={styles.btndash}
-            onPress={() => navigation.navigate("Perfil")}
-          >
-            <FontAwesome5 name="user-alt" size={12} color="#fff" />
-            <Text style={styles.textSubmit}>Meu Perfil</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.btndash}
-            onPress={() => navigation.navigate("Cadastro")}
-          >
-            <FontAwesome5 name="cog" size={12} color="#fff" />
-            <Text style={styles.textSubmit}>Cadastro de Recursos</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.btndash}
-            onPress={() => navigation.navigate("Solicitacao")}
-          >
-            <FontAwesome5 name="list-ul" size={12} color="#fff" />
-            <Text style={styles.textSubmit}>Solicitações de Recursos</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.btndash, styles.btndashSair]}
-            onPress={() => Logout()}
-          >
-            <FontAwesome5 name="times" size={12} color="#525252" />
-            <Text style={[styles.textSubmit, styles.textSubmitSair]}>Sair</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </ScrollView>
+        <BotaoPadrao
+          Label="Sair"
+          BgColor="#E4E4E4"
+          ColorLabel="#525252"
+          IconName="times"
+          marginLeftText={8}
+          OnPress={() => Logout()}
+          marginVertical={5}
+          borderRadius={8}
+        />
+      </View>
+    </Background>
   );
 }

@@ -1,353 +1,250 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, 
+  View,
   Text,
-  KeyboardAvoidingView, 
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  TextInput,
-  SafeAreaView,
-  AsyncStorage,
-  RefreshControl,
-  StatusBar
+  KeyboardAvoidingView,
+  Alert,
+  ScrollView
 } from 'react-native';
+import { useUser } from "../../../Context/UserProvider";
+import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+//API
+import apiaxios from '../../../services/apiaxios';
 
 //Components
-import BtnVoltar from '../../../components/BtnVoltar/index'
+import BtnVoltar from '../../../components/BtnVoltar/index';
+import BotaoPadrao from "../../../components/BotaoPadrao/BotaoPadrao";
+import InputPerfil from '../../../components/InputPerfil';
+import ChangePassword from '../../../components/Modal/ChangePassword/index';
+import HeaderPadrao from '../../../components/HeaderPadrao/HeaderPadrao';
+import Alerta from '../../../components/Modal/Alerta/Alerta';
 
+//Estilos
 import styles from './styles';
+import Background from '../../../components/Background/Background';
 
-//import { base_URL_authenticate } from './services/api'
+export default function Perfil() {
+  const { User, setUser } = useUser();
+  const { goBack } = useNavigation();
+  const isCancelled = useRef(true);
 
-export default function Perfil({navigation}) {
-  const [referenc,setReferenc] = useState(true)
-  //state de dados do usuario
-  const [nome,setNome] = useState('')
-  const [usuario,setUsuario] = useState('')
-  const [password,setPassword] = useState('')
-  const [passwordNova,setPasswordNova] = useState('')
-  const [passConfirma, setPassConfirma] = useState('')
-
-  const [rua,setRua] = useState('')
-  const [number,setNumber] = useState('')
-  const [bairro,setBairro] = useState('')
-  const [estado,setEstado] = useState('')
-  const [municipio,setMunicipio] = useState('')
-  const [ref,setRef] = useState('')
-  const [cep,setCep] = useState('')
-  const [tel,setTel] = useState('')
-  const [email,setEmail] = useState('')
-
-  const [horario,setHorario] = useState('')
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [isModalAlertaVisible, setModalAlertaVisible] = useState(false);
+  const [MessageModal, setMessageModal] = useState("");
+  const [time, setTime] = useState(false);
 
   useEffect(() => {
-    Horario()
-    _retrieveData()
-    setReferenc(false)
-  },[referenc])
 
-  async function _retrieveData() {
+    return () => isCancelled.current = false
+  })
+
+  //Abre ou Fecha o modal de troca de senha
+  function toggleModal() {
+    setModalVisible(!isModalVisible);
+  };
+  //Abre ou Fecha o modal de troca de alerta
+  function toggleModalAlerta(message) {
+    setModalAlertaVisible(!isModalAlertaVisible);
+    setMessageModal(message)
+  };
+
+  //Array Function para Voltar para Dashboard
+  const toogleGoBack = () => {
+    return 'Dashboard'
+  }
+
+  //Função para trocar de senha, recebe aqui as senhas do modal
+  async function ChangePass(item) {
+
     try {
-      const value = JSON.parse(await AsyncStorage.getItem('user'));
-      if (value !== null) {
-        // Endereço
-        setBairro(value["address"]["bairro"]);
-        setCep(value["address"]["cep"]);
-        setEmail(value["address"]["email"]);
-        setEstado(value["address"]["estado"]);
-        setMunicipio(value["address"]["municipio"]);
-        setNumber(value["address"]["number"]);
-        setRef(value["address"]["ref"]);
-        setRua(value["address"]["rua"]);
-        setTel(value["address"]["tel"]);
+      if (isCancelled) {
+        setModalVisible(false);
+        const res = await apiaxios.put("users/update", item);
 
-        setNome(value["name"]);
-        setUsuario(value["usuario"]);
+        if (res.data.success) return toggleModalAlerta("Sua senha foi alterada com sucesso !")
       }
     } catch (error) {
-      // Error retrieving data
-    }
-  };
-
-  function CompararSenha() {
-
-  };
-
-  function Horario() {
-    let d = new Date();
-    let hour = d.getHours();
-    if(hour < 5)
-    {
-      setHorario("Boa Noite");
-    }
-    else
-    if(hour < 8)
-    {
-      setHorario("Bom Dia");
-    }
-    else
-    if(hour < 12)
-    {
-      setHorario("Bom Dia");
-    }
-    else
-    if(hour < 18)
-    {
-      setHorario("Boa tarde");
-    }
-    else
-    {
-      setHorario("Boa noite");
+      let err = error.response.data.message;
+      toggleModalAlerta(err)
     }
   }
 
+  async function ChangeDados() {
+    try {
+      setTime(true)
+      const requestDados = {
+        address: User.address,
+        name: User.name
+      }
+      const res = await apiaxios.put("users/update", requestDados);
+
+      if (res.data.success) return toggleModalAlerta("Seu dados foram salvo com sucesso !"), setTime(false)
+    } catch (error) {
+      let err = error.response.data.message;
+      toggleModalAlerta(err)
+    }
+
+  }
+
+  const address = User.address
+
   return (
-    <ScrollView 
-    style={styles.container}
+    <Background
+      bgColor="#f0f0f7"
+      // HIconCor="#222"
+      HbgColor="#087E85"
+      HTextpage="Editar Perfil"
+      Hdestino="Dashboard"
+      header
     >
-      <SafeAreaView>
-        <KeyboardAvoidingView style={styles.container2}>
-          <View style={styles.header}>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        <KeyboardAvoidingView style={styles.container2} >
 
-            <Image 
-              style={{
-                width: 244,
-                height: 53
-              }} 
-              source={require('../../../assets/logo1.png')} 
+          <Alerta
+            ModalVisible={isModalAlertaVisible}
+            label={MessageModal}
+            // BotaoCancel
+            BotaoOK
+            // funcaoCancel={() => { }}
+            funcaoOk={() => toggleModalAlerta()}
+          />
+
+          <View style={styles.ViewDados}>
+
+            <InputPerfil
+              label="Nome"
+              value={User.name}
+              autoCorrect={false}
+              // corBackground="#F0F0F7"
+              onChange={(itemValue, itemIndex) => setUser({ ...User, name: itemValue })}
+            />
+
+            <InputPerfil
+              label="Rua"
+              value={address.rua}
+              autoCorrect={false}
+              // corBackground="#F0F0F7"
+              onChange={(itemValue, itemIndex) => setUser({ ...User, address: { ...address, rua: itemValue } })}
+            />
+
+            <View style={styles.ViewRow}>
+              <InputPerfil
+                widthView="59%"
+                label="Bairro"
+                value={address.bairro}
+                autoCorrect={false}
+                // corBackground="#F0F0F7"
+                onChange={(itemValue, itemIndex) => setUser({ ...User, address: { ...address, bairro: itemValue } })}
               />
-            
-            <Text style={styles.textHeader}>
-              Gestor Acadêmico Redentor - Itaperuna
-            </Text>
-            <Text style={styles.textHeader2}>
-              {horario}, {nome}
-            </Text>
+
+              <InputPerfil
+                widthView="39%"
+                label="CEP"
+                keyboardType='numeric'
+                autoCorrect={false}
+                field="cep"
+                maxLength={9}
+                textContentType={"postalCode"}
+                value={String(address.cep)}
+                // corBackground="#F0F0F7"
+                onChange={(itemValue, itemIndex) => setUser({ ...User, address: { ...address, cep: itemValue } })}
+              />
+            </View>
+
+
+
+            <InputPerfil
+              label="Estado"
+              value={address.estado}
+              autoCorrect={false}
+              // corBackground="#F0F0F7"
+              onChange={(itemValue, itemIndex) => setUser({ ...User, address: { ...address, estado: itemValue } })}
+            />
+
+
+            <InputPerfil
+              label="Municipio"
+              value={address.municipio}
+              autoCorrect={false}
+              // corBackground="#F0F0F7"
+              onChange={(itemValue, itemIndex) => setUser({ ...User, address: { ...address, municipio: itemValue } })}
+            />
+
+
+            <InputPerfil
+              label="Referencia"
+              value={address.ref}
+              autoCorrect={false}
+              // corBackground="#F0F0F7"
+              onChange={(itemValue, itemIndex) => setUser({ ...User, address: { ...address, ref: itemValue } })}
+            />
+
+
+            <InputPerfil
+              label="Número"
+              value={String(address.number)}
+              autoCorrect={false}
+              // corBackground="#F0F0F7"
+              keyboardType='numeric'
+              onChange={(itemValue, itemIndex) => setUser({ ...User, address: { ...address, number: itemValue } })}
+            />
+
+
+            <InputPerfil
+              label="Telefone"
+              textContentType={"telephoneNumber"}
+              autoCorrect={false}
+              // corBackground="#F0F0F7"
+              keyboardType='numeric'
+              field="phone"
+              maxLength={15}
+              value={String(address.tel)}
+              onChange={(itemValue, itemIndex) => setUser({ ...User, address: { ...address, tel: itemValue } })}
+            />
+
+            <InputPerfil
+              label="E-mail"
+              autoCorrect={false}
+              // corBackground="#F0F0F7"
+              value={address.email}
+              onChange={(itemValue, itemIndex) => setUser({ ...User, address: { ...address, email: itemValue } })}
+            />
+
+            <BotaoPadrao
+              Label="Alterar Senha"
+              BgColor="#087E85"
+              ColorLabel="#fff"
+              // IconName="list-ul"
+              borderRadius={8}
+              OnPress={() => toggleModal()}
+            />
+
+            <ChangePassword
+              ModalVisible={isModalVisible}
+              toggleModal={() => toggleModal()}
+              mudarsenha={(item) => ChangePass(item)}
+            />
+
+
+            <BotaoPadrao
+              Label="Salvar"
+              BgColor="#087E85"
+              ColorLabel="#fff"
+              loading={time}
+              borderRadius={8}
+              OnPress={() => ChangeDados()}
+            />
+
           </View>
 
-          <View style={styles.ViewDados}>
-            <View style={styles.ViewTextHeader}>
-              <Text style={styles.TextHeaderDados}>Dados do Usuário</Text>
-            </View>
-            
-            <View style={styles.DadosLogin}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Login: </Text>
-              </View>
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={usuario}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setUsuario(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosNome}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Nome: </Text>
-              </View>
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={nome}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setNome(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosSenhaAtual}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Senha Atual: </Text>
-              </View>
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={password}
-                  autoCorrect={false} 
-                  secureTextEntry={true}
-                  onChangeText={(itemValue, itemIndex) => setPassword(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosNovaSenha}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Nova Senha: </Text>
-              </View>
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={passwordNova}
-                  autoCorrect={false} 
-                  secureTextEntry={true}
-                  onChangeText={(itemValue, itemIndex) => setPasswordNova(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosConfirmaSenha}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Confirmar Senha: </Text>
-              </View>  
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={passConfirma}
-                  autoCorrect={false} 
-                  secureTextEntry={true}
-                  onChangeText={(itemValue, itemIndex) => setPassConfirma(itemValue)}
-                />
-              </View>
-            </View>
-            <TouchableOpacity 
-              style={styles.btnAtualizarDados}
-              onPress={ ()=> {}}
-              > 
-              <Text style={styles.textAtualizar}>Atualizar</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.ViewDados}>
-            <View style={styles.ViewTextHeader}>
-              <Text style={styles.TextHeaderDados}>Contato</Text>
-            </View>
-            
-            <View style={styles.DadosEndereço}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Endereço: </Text>
-              </View>
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={rua}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setRua(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosBairro}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Bairro: </Text>
-              </View>
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={bairro}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setBairro(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosEstado}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Estado: </Text>
-              </View>
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={estado}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setEstado(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosMunicipio}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Município: </Text>
-              </View>
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={municipio}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setMunicipio(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosReferencia}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Referência: </Text>
-              </View>  
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={ref}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setRef(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosNumero}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Número: </Text>
-              </View>  
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  keyboardType='numeric'
-                  value={String(number)}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setNumber(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosCep}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>CEP: </Text>
-              </View>  
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  textContentType={"postalCode"}
-                  keyboardType='numeric'
-                  maxLength={8}
-                  value={String(cep)}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setCep(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosTel}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>Telefone: </Text>
-              </View>  
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  textContentType={"telephoneNumber"}
-                  keyboardType='numeric'
-                  maxLength={11}
-                  value={String(tel)}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setTel(itemValue)}
-                />
-              </View>
-            </View>
-            <View style={styles.DadosEmail}>
-              <View style={styles.ViewText}>
-                <Text style={styles.textDados}>E-mail: </Text>
-              </View>  
-              <View style={styles.ViewInput}>
-                <TextInput 
-                  style={styles.input} 
-                  value={email}
-                  autoCorrect={false} 
-                  onChangeText={(itemValue, itemIndex) => setEmail(itemValue)}
-                />
-              </View>
-            </View>
-            <TouchableOpacity //Botão Atualizar Dados
-              style={styles.btnAtualizarDados}
-              onPress={ ()=> {}}
-              > 
-              <Text style={styles.textAtualizar}>Atualizar</Text>
-            </TouchableOpacity>
-          </View>
-
-          <BtnVoltar destino={'Dashboard'} />
-          
         </KeyboardAvoidingView>
-      </SafeAreaView>
-    </ScrollView>
+
+      </ScrollView>
+    </Background>
   )
 }

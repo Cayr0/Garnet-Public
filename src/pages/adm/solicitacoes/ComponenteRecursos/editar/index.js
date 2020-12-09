@@ -1,56 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, 
-  Text,   
-  KeyboardAvoidingView, 
-  Image,
+  View,
+  Text,
+  KeyboardAvoidingView,
   ScrollView,
-  AsyncStorage,
   Alert,
-  RefreshControl,
-  YellowBox,
 } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { useUser } from '../../../../../Context/UserProvider';
-//Components
-import BtnVoltar from '../../../../../components/BtnVoltar/index'
-
-import Item from './Item';
-import styles from './styles';
 import moment from 'moment';
 
-import { base_URL_DELETE_PUT_GET_POST_Recursos } from '../../../../../services/api'
+//Components
+import Background from '../../../../../components/Background/Background';
+import Item from './Item';
 
-export default function EditarSolicitacao({ route, navigation}) {
+import styles from './styles';
+
+import { base_URL_DELETE_PUT_GET_POST_Recursos } from '../../../../../services/api'
+import apiaxios from '../../../../../services/apiaxios';
+import Alerta from '../../../../../components/Modal/Alerta/Alerta';
+import AlertaInfo from '../../../../../components/Modal/AlertaInfo/AlertaInfo';
+
+export default function EditarSolicitacao({ route, navigation }) {
 
   const { User } = useUser();
 
   const [selectedValue, setSelectedValue] = useState('');
-  const [inReload,setInReload] = useState(true);
-  const [horario,setHorario] = useState('');
-  const [data,setData] = useState([
+  const [inReload, setInReload] = useState(true);
+  const [horario, setHorario] = useState('');
+  const [data, setData] = useState([
     {
       professor: '',
       dataSolicitada: '',
       dataFezSolicitacao: '',
-      horario: [ ],
+      horario: [],
       salaSolic: '',
       statusSolic: '',
       descricao: '',
       disciplina: '',
       disciplina2: '',
       qtdealunos: '',
-      recsolicitado: [ ],
+      recsolicitado: [],
       observacao: '',
       id: '',
     }
   ]);
 
   const { itemId } = route.params;
-  
 
+  const [isModalAlertaVisibleAlertaInfo, setIsModalAlertaVisibleAlertaInfo] = useState(false);
+  const [MessageModalAlertaInfo, setMessageModalAlertaInfo] = useState("");
 
-  useEffect(()=> {
+  const [isModalAlertaVisible, setIsModalAlertaVisible] = useState(false);
+  const [MessageModal, setMessageModal] = useState("");
+
+  function toggleModalAlerta(message) {
+    setMessageModal(message)
+    setIsModalAlertaVisible(!isModalAlertaVisible);
+  };
+
+  function toggleModalAlertaInfo(message) {
+    setMessageModalAlertaInfo(message)
+    setIsModalAlertaVisibleAlertaInfo(!isModalAlertaVisibleAlertaInfo);
+  };
+
+  useEffect(() => {
+    let mount = true
     setData({
       professor: itemId.professor,
       dataSolicitada: itemId.data,
@@ -66,219 +81,48 @@ export default function EditarSolicitacao({ route, navigation}) {
       observacao: itemId.observacoes,
       id: itemId._id,
     });
-    Horario();
     setInReload(false);
-  },[]);
-  
-  
-  function atualizar() {
-    //o ip vai mudar dependendo do ip da maquina que for roda o server
-    fetch(base_URL_DELETE_PUT_GET_POST_Recursos+id, {
-      method:"PUT",
-      //aqui vou poder mandar o token para alguma requisição
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        "descricao":postText,
-		    "setor":selectedValue,
-		    "status":status,
-		    "qtde":qtde
-      })
-    })
-    //recebo a resposta do server
-    .then(res=>res.json())
-    .then ((res) => {
-      if (res.error) {
-        Alert.alert(
-          "Mensagem",
-          `${res.error}`,
-          [
-            {
-              text: "Cancel",
-              onPress: () => {},
-              style: "cancel"
-            },
-            { text: "OK", onPress: () => {} }
-          ],
-          { cancelable: false }
-        );
-      } else {
-        Alert.alert(
-          "Mensagem",
-          `Foi Atualizado: "${res.descr.descricao}" com sucesso!`,
-        );
-        setSelectedValue("Selecione")
-        setPostText('')
-        setQtde('')
-        setTimeout(() => (
-          navigation.navigate('Cadastro')
-        ), 1500)
-      }
-    })
 
-  }
-
-  function delet() {
-    Alert.alert(
-      "Alerta",
-      "Tem certeza que deseja apagar esse recurso ?",
-      [
-        {
-          text: "Cancel",
-          onPress: () => {},
-          style: "cancel"
-        },
-        { text: "Sim", onPress: () => deletar() }
-      ],
-      { cancelable: false }
-    );
-  }
-
-  function deletar() {
-    //o ip vai mudar dependendo do ip da maquina que for roda o server
-    fetch(base_URL_DELETE_PUT_GET_POST_Recursos+id, {
-      method:"DELETE",
-      //aqui vou poder mandar o token para alguma requisição
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    //recebo a resposta do server
-    .then(res=>res.json())
-    .then ((res) => {
-      if(res) {
-        Alert.alert(
-          "Mensagem",
-          `${res.message}`,
-          [
-            { text: "Sim", onPress: () => navigation.navigate('Cadastro') }
-          ]
-        );
-        setPostText('')
-        setSelectedValue('')
-        setQtde('')
-        setId('')
-        setStatus('')
-      }
-    })
-  }
-
-  function onRefresh() {
-    //Vai limpar o useState data que está armazenado os Dados da API
-    //Vai obter os dados mais recentes, da API
-    //BuscarRecursos();
-  }
-
-  function Horario() {
-    let d = new Date();
-    let hour = d.getHours();
-    if(hour < 5)
-    {
-      setHorario("Boa Noite");
-    }
-    else
-    if(hour < 8)
-    {
-      setHorario("Bom Dia");
-    }
-    else
-    if(hour < 12)
-    {
-      setHorario("Bom Dia");
-    }
-    else
-    if(hour < 18)
-    {
-      setHorario("Boa tarde");
-    }
-    else
-    {
-      setHorario("Boa noite");
-    }
-  }
-
-  function situacao() {
-    if(data.statusSolic=='ATENDIDO'){
-      return
-    }
-    if(data.statusSolic=='ANDAMENTO'){
-
-      return (
-          <View style={styles.ViewBtnSituacao}>
-            <RectButton 
-              style={styles.btnSituacao}
-              onPress={ ()=> {} }
-            > 
-              <Text style={styles.textVoltar}>Pedente</Text>
-            </RectButton>
-            <RectButton 
-              style={[styles.btnSituacao,styles.confirmarColor]}
-              onPress={ ()=> {} }
-            > 
-              <Text style={styles.textVoltar}>Confirmar</Text>
-            </RectButton>
-            <RectButton 
-              style={[styles.btnSituacao,styles.AtenderColor]}
-              onPress={ ()=> {} }
-            > 
-              <Text style={styles.textVoltar}>Atender</Text>
-            </RectButton>
-          </View>
-        )
-    } else {
-
-      return (
-          <View style={styles.ViewBtnSituacao}>
-            <RectButton 
-              style={[styles.btnSituacao,styles.confirmarColor]}
-              onPress={ ()=> {} }
-            > 
-              <Text style={styles.textVoltar}>Confirmar</Text>
-            </RectButton>
-            <RectButton 
-              style={[styles.btnSituacao,styles.AtenderColor]}
-              onPress={ ()=> {} }
-            > 
-              <Text style={styles.textVoltar}>Atender</Text>
-            </RectButton>
-          </View>
-        )
-    }
-  }
- 
+    return () => mount = false;
+  }, []);
 
   return (
-    <ScrollView 
-      style={styles.container}
-      refreshControl={ <RefreshControl refreshing={inReload} onRefresh={onRefresh} />}  
+    <Background
+      bgColor="#f0f0f7"
+      HIconCor="#222"
+      HbgColor="#087E85"
+      HTextpage="Detalhe da Solicitação"
+      Hdestino="Solicitacao"
+      header
     >
-      <KeyboardAvoidingView style={styles.container2}>
-        <View style={styles.header}>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
 
-          <Image 
-            style={{
-              width: 244,
-              height: 53
-            }} 
-            source={require('../../../../../assets/logo1.png')} 
-            />
-          
-          <Text style={styles.textHeader}>
-            Gestor Acadêmico Redentor - Itaperuna
-          </Text>
-          <Text style={styles.textHeader2}>
-            {horario}, {User.name}
-          </Text>
-        </View>   
-          
-        <Item data={data} /> 
+        <Alerta
+          ModalVisible={isModalAlertaVisible}
+          label={MessageModal}
+          // BotaoCancel
+          BotaoOK
+          // funcaoCancel={() => { }}
+          funcaoOk={() => Voltar("Solicitacao")}
+        />
+        <AlertaInfo
+          ModalVisible={isModalAlertaVisibleAlertaInfo}
+          label={MessageModalAlertaInfo}
+          // BotaoCancel
+          BotaoOK
+          // funcaoCancel={() => { }}
+          funcaoOk={() => { setIsModalAlertaVisibleAlertaInfo(!isModalAlertaVisibleAlertaInfo) }}
+        />
 
-        {situacao()}     
+        <KeyboardAvoidingView style={styles.container2}>
 
-        <BtnVoltar destino={'Solicitacao'} />
+          <Item data={data} DataSet={(item) => setData(item)} />
 
-      </KeyboardAvoidingView>
-    </ScrollView>
+        </KeyboardAvoidingView>
+      </ScrollView>
+    </Background>
   )
 }

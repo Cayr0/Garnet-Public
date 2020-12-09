@@ -3,231 +3,135 @@ import io from "socket.io-client";
 import {
   View,
   Text,
-  Image,
-  KeyboardAvoidingView,
   TouchableOpacity,
   ScrollView,
   FlatList,
   YellowBox,
-  TextInput,
   ActivityIndicator,
-  RefreshControl,
 } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
 
-import apiaxios from "../../../services/apiaxios";
-import { URL } from "../../../services/apiaxios";
+import { useFocusEffect } from "@react-navigation/native";
 
 //Context
 import { useUser } from "../../../Context/UserProvider";
 
-//Components
-import BtnVoltar from "../../../components/BtnVoltar/index";
+import apiaxios from "../../../services/apiaxios";
 
+//Components
+import InputPerfil from "../../../components/InputPerfil";
+import BotaoPadrao from "../../../components/BotaoPadrao/BotaoPadrao";
+import Background from "../../../components/Background/Background";
+
+//Estilo
 import styles from "./styles";
-import { useFocusEffect } from "@react-navigation/native";
 
 export default function Cadastro({ navigation: { goBack, navigate } }) {
-  const { User } = useUser(User);
-
   YellowBox.ignoreWarnings([
     "VirtualizedLists should never be nested", // TODO: Remove when fixed
   ]);
 
+  const { User } = useUser(User);
+
   const [data, setData] = useState([]);
   const [isMemoryData, setIsMemoryData] = useState([]);
-  const [filterText, setFilterText] = useState("");
+  const [filterText, setFilterText] = useState(null);
   const [errorApi, setErrorApi] = useState("");
-  const [pullRefresh, setPullRefresh] = useState(false);
-  const [horario, setHorario] = useState("");
+  const [InReload, setInReload] = useState(true);
 
   useFocusEffect(
-    useCallback(()=>{
-      BuscarRecursos();
-      return () => BuscarRecursos();
-    },[]),
+    useCallback(() => {
+      let mounted = BuscarRecursos();
+
+      return () => mounted
+    }, [])
   );
 
-  // async function registerToSocket() {
-  //   const socket = io(URL);
-
-  //   //CreateSolicitacao, UpdateSolicitacao
-  //   await socket.on("CreateRecurso", (newRecurso) => {
-  //     console.log(newRecurso);
-  //     setData([newRecurso, ...data]);
-  //     setIsMemoryData([newRecurso, ...isMemoryData]);
-  //   });
-
-  //   await socket.on("UpdateRecurso", (updateRecurso) => {
-  //     setData(
-  //       data.map((Rec) => {
-  //         Rec._id === updateRecurso._id ? updateRecurso : Rec;
-  //       })
-  //     );
-  //     setIsMemoryData(data);
-  //   });
-  // }
-
-  // useEffect(() => {
-  //   registerToSocket();
-  // }, [data]);
-
-  useEffect(() => {
-    Horario();
-    BuscarRecursos();
-  }, []);
-  //Busca no banco e traz os recursos cadastrados
   async function BuscarRecursos() {
     try {
       //Lib para conectar com o banco
       const res = await apiaxios.get("recursos");
       setData(res.data);
       setIsMemoryData(res.data);
+      setInReload(false)
     } catch (error) {
       setErrorApi(error);
+      setInReload(false)
     }
   }
 
-  function Horario() {
-    let d = new Date();
-    let hour = d.getHours();
-    if (hour < 5) {
-      setHorario("Boa Noite");
-    } else if (hour < 8) {
-      setHorario("Bom Dia");
-    } else if (hour < 12) {
-      setHorario("Bom Dia");
-    } else if (hour < 18) {
-      setHorario("Boa tarde");
+  //Filtro
+  useEffect(() => {
+    let mount = true
+    if (!filterText == "") {
+      setIsMemoryData(
+        isMemoryData.filter((list) => {
+          return list.descricao
+            .toLowerCase()
+            .includes(filterText.toLowerCase());
+        })
+      );
     } else {
-      setHorario("Boa noite");
+      setIsMemoryData(data)
     }
-  }
-
-  async function onRefresh() {
-    //Vai limpar o useState data que está armazenado os Dados da API
-    setData([]);
-    //Vai obter os dados mais recentes, da API
-    await BuscarRecursos();
-  }
-
-  function searchList() {
-    const filteredList = isMemoryData.filter((list) => {
-      let listLowercase = list.descricao.toLowerCase();
-
-      let searchTermLowercase = filterText.toLowerCase();
-
-      return listLowercase.indexOf(searchTermLowercase) > -1;
-    });
-    setData(filteredList);
-  }
-
-  async function ClearFilter() {
-    setFilterText("");
-    if (!filterText) {
-      searchList();
-    }
-  }
+    return () => mount = false;
+  }, [filterText])
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => {
         navigate("EditarRecurso", { itemId: item });
       }}
-      style={styles.flatList}
+      style={styles.ViewRenderItem}
     >
-      <Text style={styles.test1} numberOfLines={1}>
+      <Text style={styles.TextDescricaoRenderItem} numberOfLines={1}>
         {item.descricao}
       </Text>
-      <Text style={styles.test2}>{item.qtde}</Text>
-      <Text style={styles.test3}>{item.status}</Text>
+      <Text style={styles.TextQtdeRenderItem}>{item.qtde}</Text>
+      <Text style={styles.TextStatusRenderItem}>{item.status}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={pullRefresh} onRefresh={onRefresh} />
-      }
-    >
-      <KeyboardAvoidingView style={styles.container2}>
-        <View style={styles.header}>
-          <Image
-            style={{
-              width: 244,
-              height: 53,
-            }}
-            source={require("../../../assets/logo1.png")}
-          />
 
-          <Text style={styles.textHeader}>
-            Gestor Acadêmico Redentor - Itaperuna
-          </Text>
-          <Text style={styles.textHeader2}>
-            {horario}, {User.name}
-          </Text>
-        </View>
+    <Background
+      bgColor="#f0f0f7"
+      // HIconCor="#222"
+      HbgColor="#087E85"
+      HTextpage="Administração de Recursos"
+      Hdestino="Dashboard"
+      header
+    >
+      <ScrollView
+        style={{
+          flex: 1,
+          width: "100%"
+        }}
+        showsVerticalScrollIndicator={false}
+      >
 
         <View style={styles.ViewDados}>
-          <View style={styles.ViewTextHeader}>
-            <Text style={styles.TextHeaderDados}>
-              Administração de Recursos
-            </Text>
+
+          <View style={styles.ViewBotoes} >
+            <InputPerfil
+              label="Descrição"
+              value={filterText}
+              widthView="80%"
+              marginRight={10}
+              autoCorrect={false}
+              onChange={(itemValue, itemIndex) => setFilterText(itemValue)}
+            />
+            <BotaoPadrao
+              BgColor="#087E85"
+              ColorLabel="#fff"
+              IconName="plus"
+              width="15%"
+              borderRadius={8}
+              OnPress={() => navigate("CadastrarRecurso")}
+
+            />
           </View>
 
-          <View style={styles.Descricao}>
-            <View style={styles.ViewText}>
-              <Text style={styles.textDescricao}>Descrição: </Text>
-            </View>
-            <View style={styles.inputDescricao}>
-              <TextInput
-                style={styles.input}
-                placeholder="Pesquisar..."
-                value={filterText}
-                autoCorrect={false}
-                onChangeText={(value) => {
-                  setFilterText(value);
-                }}
-              />
-            </View>
-          </View>
-
-          <View style={styles.btnheader}>
-            <TouchableOpacity
-              style={[styles.BtnBarra, styles.BtnPesquisa]}
-              onPress={() => {
-                ClearFilter();
-              }}
-            >
-              <FontAwesome5 name="backspace" size={12} color="#525252" />
-              <Text style={styles.textBtn}>Limpar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.BtnBarra, styles.BtnPesquisa]}
-              onPress={() => searchList()}
-            >
-              <FontAwesome5 name="search" size={12} color="#525252" />
-              <Text style={styles.textBtn}>Consultar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.BtnBarra, styles.BtnNovo]}
-              onPress={() => {
-                navigate("CadastrarRecurso");
-              }}
-            >
-              <FontAwesome5 name="plus" size={12} color="#fff" />
-              <Text style={[styles.textBtn, styles.textBtnNovo]}>
-                Novo recurso
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.viewRecurso}>
-            <Text style={styles.textRecurso}>Recursos</Text>
-          </View>
-
-          {!data ? (
+          {InReload ? (
             <View style={styles.viewFlatList}>
               <ActivityIndicator
                 size="large"
@@ -240,23 +144,25 @@ export default function Cadastro({ navigation: { goBack, navigate } }) {
               />
             </View>
           ) : (
-            <View style={styles.viewFlatList}>
-              <View style={styles.barraDescricao}>
-                <Text style={styles.textDesc}>Descrição</Text>
-                <Text style={styles.textBarraDescricao}>QT/dia</Text>
-                <Text style={styles.textDesc}>Status</Text>
+              <View style={styles.viewFlatList}>
+                <View style={styles.barraDescricao}>
+                  <Text style={styles.textDesc}>Descrição</Text>
+                  <Text style={styles.textBarraDescricao}>QT/dia</Text>
+                  <Text style={styles.textDesc}>Status</Text>
+                </View>
+                <FlatList
+                  data={isMemoryData}
+                  scrollEnabled={false}
+                  renderItem={renderItem}
+                  keyExtractor={(item, index) => item._id}
+                />
               </View>
-              <FlatList
-                data={data}
-                renderItem={renderItem}
-                keyExtractor={(item, index) => index.toString()}
-              />
-            </View>
-          )}
+            )}
+
         </View>
 
-        <BtnVoltar destino={"Dashboard"} />
-      </KeyboardAvoidingView>
-    </ScrollView>
+      </ScrollView>
+
+    </Background>
   );
 }

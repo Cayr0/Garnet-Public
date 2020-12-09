@@ -3,33 +3,44 @@ import {
   View,
   Text,
   KeyboardAvoidingView,
-  TouchableOpacity,
-  Image,
-  ScrollView,
   Alert,
-  TextInput,
   Picker,
-  AsyncStorage,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 //Components
-import BtnVoltarBack from "../../../../../components/BtnVoltarBack/index";
+import HeaderPadrao from "../../../../../components/HeaderPadrao/HeaderPadrao";
+import InputPerfil from "../../../../../components/InputPerfil";
+import BotaoPadrao from "../../../../../components/BotaoPadrao/BotaoPadrao";
 
-import styles from "./styles";
-
-//Context
-import { useUser } from "../../../../../Context/UserProvider";
-
+//API
 import apiaxios, { URL } from "../../../../../services/apiaxios";
 
-export default function CadastrarRecurso({ navigation }) {
-  const { User } = useUser(User);
+import styles from "./styles";
+import Background from "../../../../../components/Background/Background";
+import AlertaInfo from "../../../../../components/Modal/AlertaInfo/AlertaInfo";
+import Alerta from "../../../../../components/Modal/Alerta/Alerta";
 
+export default function CadastrarRecurso({ navigation }) {
   const [selectedValue, setSelectedValue] = useState("Selecione");
   const [postText, setPostText] = useState("");
   const [qtde, setQtde] = useState("");
 
-  // Função de cadastrar
+  const [isModalAlertaVisibleAlertaInfo, setIsModalAlertaVisibleAlertaInfo] = useState(false);
+  const [MessageModalAlertaInfo, setMessageModalAlertaInfo] = useState("");
+
+  const [isModalAlertaVisible, setIsModalAlertaVisible] = useState(false);
+  const [MessageModal, setMessageModal] = useState("");
+
+  function toggleModal(menssage) {
+    setMessageModal(menssage)
+    setIsModalAlertaVisible(!isModalAlertaVisible);
+  };
+  function toggleModalInfo(menssage) {
+    setMessageModalAlertaInfo(menssage)
+    setIsModalAlertaVisibleAlertaInfo(!isModalAlertaVisibleAlertaInfo);
+  };
+
   async function cadastrar() {
     try {
       var Recursos = {
@@ -39,141 +50,117 @@ export default function CadastrarRecurso({ navigation }) {
         qtde: qtde,
       };
 
-      if (postText && qtde && selectedValue!="Selecione") {
+      if (postText && qtde && selectedValue != "Selecione") {
         const res = await apiaxios.post("recursos", Recursos);
 
-        console.log(res.data);
-
-        Alert.alert(
-          "Mensagem",
-          `Foi adicionado: "${res.data.descricao}" com sucesso!`,
-          [{ text: "OK", onPress: () => {navigation.navigate("Cadastro")} }]
-        );
+        toggleModal(`Foi adicionado: "${res.data.descricao}" com sucesso!`)
 
         setSelectedValue("Selecione");
         setPostText("");
         setQtde("");
-      } else {
-        Alert.alert(
-          "Mensagem",
-          `Falta alguma coisa`,
-          [
-            {
-              text: "Cancel",
-              onPress: () => {},
-              style: "cancel",
-            },
-            { text: "OK", onPress: () => {} },
-          ],
-          { cancelable: false }
-        );
       }
     } catch (error) {
-      Alert.alert(
-        "Mensagem",
-        `Recurso: "${postText}" ${error}`,
-        [
-          {
-            text: "Cancel",
-            onPress: () => {},
-            style: "cancel",
-          },
-          { text: "OK", onPress: () => {} },
-        ],
-        { cancelable: false }
-      );
+
+      toggleModalInfo(`Recurso: ${postText} ${error}`)
+
     }
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <KeyboardAvoidingView style={styles.container2}>
-        <View style={styles.header}>
-          <Image
-            style={{ width: 244, height: 53 }}
-            source={require("../../../../../assets/logo1.png")}
-          />
-          <Text style={styles.textHeader}>
-            Gestor Acadêmico Redentor - Itaperuna
-          </Text>
-          <Text style={styles.textHeader2}>Boa Noite, {User.name}</Text>
-        </View>
-
+    <Background
+      bgColor="#f0f0f7"
+      // HIconCor="#222"
+      HbgColor="#087E85"
+      HTextpage="Cadastro de Recursos"
+      Hdestino="Cadastro"
+      header
+    >
+      <View
+        style={{
+          flex: 1,
+          width: "100%"
+        }}
+      >
+        <Alerta
+          ModalVisible={isModalAlertaVisible}
+          label={MessageModal}
+          // BotaoCancel
+          BotaoOK
+          // funcaoCancel={() => { }}
+          funcaoOk={() => { navigation.goBack(), setIsModalAlertaVisible(!isModalAlertaVisible) }}
+        />
+        <AlertaInfo
+          ModalVisible={isModalAlertaVisibleAlertaInfo}
+          label={MessageModalAlertaInfo}
+          // BotaoCancel
+          BotaoOK
+          // funcaoCancel={() => { }}
+          funcaoOk={() => { setIsModalAlertaVisibleAlertaInfo(!isModalAlertaVisibleAlertaInfo) }}
+        />
         <View style={styles.ViewDados}>
-          <View style={styles.ViewTextHeader}>
-            <Text style={styles.TextHeaderDados}>Novo Recurso</Text>
+
+          <InputPerfil
+            label="Descrição*"
+            value={postText}
+            autoCorrect={false}
+            onChange={(itemValue, itemIndex) => setPostText(itemValue)}
+          />
+
+          <View style={styles.Dados}>
+
+            <Text style={styles.Label}>Setor*:</Text>
+
+
+            <Picker
+              style={styles.input}
+              selectedValue={selectedValue}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedValue(itemValue)
+              }
+              itemStyle={{
+                fontFamily: "Poppins_400Regular"
+              }}
+            >
+              <Picker.Item label="Selecione" value="Selecione"></Picker.Item>
+              <Picker.Item label="Audiovisual" value="Audiovisual"></Picker.Item>
+              <Picker.Item label="Administrativo" value="ADM"></Picker.Item>
+            </Picker>
+
           </View>
 
-          <View style={styles.Descricao}>
-            <View style={styles.ViewText}>
-              <Text style={styles.textDescricao}>Descrição*: </Text>
-            </View>
-            <View style={styles.inputDescricao}>
-              <TextInput
-                style={styles.input}
-                value={postText}
-                autoCorrect={false}
-                onChangeText={(itemValue, itemIndex) => setPostText(itemValue)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.Setor}>
-            <View style={styles.ViewTextSetor}>
-              <Text style={styles.textSetor}>Setor*: </Text>
-            </View>
-            <View style={styles.inputSetor}>
-              <Picker
-                style={styles.input}
-                selectedValue={selectedValue}
-                onValueChange={(itemValue, itemIndex) =>
-                  setSelectedValue(itemValue)
-                }
-              >
-                <Picker.Item label="Selecione" value="Selecione"></Picker.Item>
-                <Picker.Item
-                  label="Audiovisual"
-                  value="Audiovisual"
-                ></Picker.Item>
-                <Picker.Item label="Administrativo" value="ADM"></Picker.Item>
-              </Picker>
-            </View>
-          </View>
-
-          <View style={styles.Quantidade}>
-            <View style={styles.ViewTextQt}>
-              <Text style={styles.textQT}>QT pro Dia*: </Text>
-            </View>
-            <View style={styles.ViewInputQT}>
-              <TextInput
-                keyboardType="numeric"
-                style={styles.inputQT}
-                value={qtde}
-                autoCorrect={false}
-                onChangeText={(itemValue, itemIndex) => setQtde(itemValue)}
-              />
-            </View>
-          </View>
+          <InputPerfil
+            label="QT por Dia*"
+            keyboardType="numeric"
+            value={qtde}
+            autoCorrect={false}
+            onChange={(itemValue, itemIndex) => setQtde(itemValue)}
+          />
 
           <View style={styles.ViewBtns}>
-            <TouchableOpacity
-              style={styles.btnGravar}
-              onPress={() => cadastrar()}
-            >
-              <Text style={styles.textGravar}>Gravar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.btnCancelar}
-              onPress={() => navigation.goBack()}
-            >
-              <Text style={styles.textCancelar}>Cancelar / Fechar</Text>
-            </TouchableOpacity>
+            <BotaoPadrao
+              Label="Gravar"
+              BgColor="#087E85"
+              ColorLabel="#fff"
+              // IconName="plus"
+              borderRadius={8}
+              OnPress={() => cadastrar()}
+              width="45%"
+              padding={10}
+            />
+            <BotaoPadrao
+              Label="Cancelar"
+              BgColor="#E4E4E4"
+              ColorLabel="#525252"
+              // IconName="plus"
+              borderRadius={8}
+              OnPress={() => navigation.goBack()}
+              width="45%"
+              padding={10}
+            />
           </View>
-        </View>
 
-        <BtnVoltarBack />
-      </KeyboardAvoidingView>
-    </ScrollView>
+        </View>
+      </View>
+    </Background>
   );
 }

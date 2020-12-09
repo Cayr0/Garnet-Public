@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native'
 
 import moment from 'moment';
 
 import styles from './styles'
 
-const Item = ({ item }) => {
+const Item = ({ item, inReload }) => {
 
   const { navigate } = useNavigation()
 
@@ -14,9 +14,9 @@ const Item = ({ item }) => {
   const formatH = "HH:mm";
 
   function tempoHora(item) {
-    const horaformatada = item.map((hora) => { 
-      if(hora.assinado == true) {
-        
+    const horaformatada = item.map((hora) => {
+      if (hora.assinado == true) {
+
         switch (hora.id) {
           case 1:
             return (`MANHÃ ${hora.hora} \n`);
@@ -52,10 +52,10 @@ const Item = ({ item }) => {
   }
 
   function color(item) {
-    if(item=='ATENDIDO'){
+    if (item == 'ATENDIDO') {
       return <View style={styles.CircleGreen} />
     }
-    if(item=='ANDAMENTO'){
+    if (item == 'ANDAMENTO') {
       return <View style={styles.CircleBlue} />
     } else {
       return <View style={styles.CircleRed} />
@@ -63,38 +63,32 @@ const Item = ({ item }) => {
   }
 
   return (
-      <TouchableOpacity 
-        onPress={ () => {navigate('EditarSolicitacao', {itemId: item})} } 
-        style={styles.flatList}
-      >
-        <View style={styles.ViewProfessor}>
-          <Text style={styles.textProfessor}>Docente:</Text>
-          <Text style={styles.textNomeProfessor}>{item.professor}</Text>
-        </View>
-        <View style={styles.ViewDate}>
-          <View>
-            <Text style={styles.textDate}>Data:</Text>
-            <Text style={styles.textNDate}>{moment(item.data).format(formatD)}</Text>
-          </View>
-          <View>
-            <Text style={styles.textDateSolicitacao}>Solicitado em:</Text>
-            <Text style={styles.textNDate}>{moment(item.createdAt).format(formatD)}</Text>
-          </View>
-        </View>
-        <View style={styles.ViewHorario}>
+    <TouchableOpacity
+      onPress={() => { navigate('EditarSolicitacao', { itemId: item }) }}
+      style={styles.flatList}
+    >
+      <View style={styles.ViewProfessor}>
+        <Text style={styles.textProfessor}>{item.professor}</Text>
+        <Text style={styles.textDisciplina}>{item.disciplina}</Text>
+      </View>
+
+      <View style={styles.ViewDate}>
+        <Text style={styles.textDate}>Solicitado em: {moment(item.createdAt).format(formatD)}</Text>
+        <Text style={styles.textDate}>Para: {moment(item.data).format(formatD)}</Text>
+      </View>
+
+      <View style={styles.ViewHorario}>
+        <View>
           <Text style={styles.textHorario}>Horário:</Text>
-          <Text style={styles.textNomeHorario} >{tempoHora(item.horario)}</Text>
+          <Text style={styles.textHorario} >{tempoHora(item.horario)}</Text>
         </View>
-        <View style={styles.ViewSala}>
-          <Text style={styles.textSala}>Sala:</Text>
-          <Text style={styles.textNomeSala}>{item.salareal}</Text>
-        </View>
-        <View style={styles.ViewStts}>
-          <Text style={styles.textStts}>Status:</Text>
-          <View style={styles.ViewNomeStts}> 
-            <View>{color(item.completed)}</View>
-          </View>
-        </View>
+        <Text style={styles.textHorario}>Sala: {item.salareal}</Text>
+      </View>
+
+      <View style={styles.ViewStts}>
+        <View>{color(item.completed)}</View>
+      </View>
+
     </TouchableOpacity>
   )
 }

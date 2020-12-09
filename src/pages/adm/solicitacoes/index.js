@@ -1,245 +1,259 @@
 import React, { useState, useEffect, useCallback } from "react";
-import io from "socket.io-client";
 import {
   View,
   Text,
   KeyboardAvoidingView,
   TouchableOpacity,
   ScrollView,
-  StatusBar,
-  AsyncStorage,
   SafeAreaView,
   ActivityIndicator,
   FlatList,
   RefreshControl,
   TextInput,
   Picker,
-  Image,
   YellowBox,
 } from "react-native";
+import { RectButton } from "react-native-gesture-handler";
 
-import { URL } from "../../../services/apiaxios";
-
-import { FontAwesome5 } from "@expo/vector-icons";
-
-import styles from "./styles";
-import Item from "./Item";
-import apiaxios from "../../../services/apiaxios";
+import { FontAwesome5, Feather, Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { useUser } from "../../../Context/UserProvider";
 
 //Components
-import BtnVoltar from "../../../components/BtnVoltar/index";
-import { useFocusEffect } from "@react-navigation/native";
+import Background from "../../../components/Background/Background";
+import HeaderPadrao from "../../../components/HeaderPadrao/HeaderPadrao";
 
-export default function Solicitacao({ navigation: { goBack, navigate } }) {
+import Item from "./Item";
+
+//Services
+import apiaxios from "../../../services/apiaxios";
+
+//Estilo
+import styles from "./styles";
+
+export default function Solicitacao({ navigation }) {
+  //NAVEGAÇÃO
+
+  //CONTEXT
+  const { User } = useUser(User);
+  const [errorApi, setErrorApi] = useState("");
+  const [inReload, setInReload] = useState(true);
+
+  //DATA
   const [solictacoes, setSolicitacoes] = useState([]);
   const [inMemorySolicitacoes, setInMemorySolicitacoes] = useState([]);
-  const [filterText, setFilterText] = useState("");
-  const [errorApi, setErrorApi] = useState("");
-  const [horario, setHorario] = useState("");
-  const [Name, setName] = useState("");
-  const [inReload, setInReload] = useState(true);
-  const [selectedValue, setSelectedValue] = useState("Todos");
+
+  //FILTROS
+  const [isFiltersVisible, setIsFiltersVisible] = useState(false);
+  const [subject, setSubject] = useState("")
+  const [weekDay, setWeekDay] = useState("")
+  const [time, setTime] = useState("")
 
   YellowBox.ignoreWarnings([
     "VirtualizedLists should never be nested", // TODO: Remove when fixed
   ]);
 
-  AsyncStorage.getItem("name", (err, result) => {
-    if (result != null) {
-      setName(JSON.parse(result));
-    }
-  });
-
-  function Horario() {
-    let d = new Date();
-    let hour = d.getHours();
-    if (hour < 5) {
-      setHorario("Boa Noite");
-    } else if (hour < 8) {
-      setHorario("Bom Dia");
-    } else if (hour < 12) {
-      setHorario("Bom Dia");
-    } else if (hour < 18) {
-      setHorario("Boa tarde");
-    } else {
-      setHorario("Boa noite");
-    }
-  }
-
-  // function onRefresh() {
-  //   //Vai limpar o useState data que está armazenado os Dados da API
-  //   //Vai obter os dados mais recentes, da API
-  //   SearchingTheAPISolicitacoes()
-  //   console.log("Pull Refresh nas Solicitacoes")
-  // }
-
-  function registerToSocket() {
-    const socket = io(URL);
-
-    //CreateSolicitacao, UpdateSolicitacao
-    socket.on("CreateSolicitacao", (newSolicitacao) => {
-      setSolicitacoes([newSolicitacao, ...solictacoes]);
-      setInMemorySolicitacoes([newSolicitacao, ...inMemorySolicitacoes]);
-    });
-  }
-
-  useFocusEffect(
-    useCallback(()=>{
-      SearchingTheAPISolicitacoes();
-      return () => SearchingTheAPISolicitacoes();
-    },[]),
-  );
-
-  async function SearchingTheAPISolicitacoes() {
+  async function GetSolicitacoes(rota) {
     try {
-      const res = await apiaxios.get("solicitacao", {
-        headers: {
-          "Content-Type": "application/json",
-          // 'Authorization': `Bearer ${JWT_TOKEN}`
-        },
-      });
+      const res = await apiaxios.get(rota);
 
       setSolicitacoes(res.data);
       setInMemorySolicitacoes(res.data);
-
       setInReload(false);
     } catch (error) {
-      setErrorApi(error);
+      let err = error.response.data.message;
+      setErrorApi(err);
     }
   }
 
-  function searchList() {
-    const filteredList = inMemorySolicitacoes.filter((list) => {
-      let listLowercase = list.professor.toLowerCase();
+  // useEffect Pesquisa de Filtros
+  useEffect(() => {
+    let mounted = true;
 
-      let searchTermLowercase = filterText.toLowerCase();
+    function changeFiltro() {
+      let datafilter = []
+      if (!subject == "" || !weekDay == "") {
 
-      return listLowercase.indexOf(searchTermLowercase) > -1;
-    });
-    setSolicitacoes(filteredList);
-  }
+        datafilter = solictacoes.filter((list) => {
+          return list.disciplina
+            .toLowerCase()
+            .includes(subject.toLowerCase());
+        })
 
-  function ClearFilter() {
-    setFilterText("");
-    if (filterText == "") {
-      searchList();
+        datafilter = datafilter.filter((list) => {
+          return list.professor
+            .toLowerCase()
+            .includes(weekDay.toLowerCase());
+        })
+
+        return setInMemorySolicitacoes(datafilter), handleFilters();
+      }
+
+      setInMemorySolicitacoes(solictacoes);
     }
+
+    changeFiltro()
+
+
+    return () => mounted = false;
+
+  }, [subject, weekDay]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let mounted
+      if (User.provider === "1") {
+        mounted = GetSolicitacoes("solicitacao");
+      } else {
+        mounted = GetSolicitacoes(`solicitacao/user/${User._id}`);
+      }
+
+      return () => mounted
+    }, [])
+  );
+
+  //para mostra os filtros
+  function handleFilters() {
+    setIsFiltersVisible(!isFiltersVisible)
   }
-
-  useEffect(() => {
-    registerToSocket();
-  }, [solictacoes]);
-
-  useEffect(() => {
-    SearchingTheAPISolicitacoes();
-    Horario();
-  },[]);
 
   return (
-    <ScrollView
-      style={styles.container}
-      // refreshControl={ <RefreshControl refreshing={inReload} onRefresh={onRefresh} />}
+    <Background
+      bgColor="#f0f0f7"
+      HIconCor="#222"
+      HbgColor="#087E85"
+      HTextpage="Solicitações"
+      Hdestino="Dashboard"
+      header
     >
-      <KeyboardAvoidingView style={styles.container2}>
-        <View style={styles.header}>
-          <Image
-            style={{
-              width: 244,
-              height: 53,
-            }}
-            source={require("../../../assets/logo1.png")}
-          />
+      <View
+        style={styles.ContentFilters}
+      >
+        <View style={styles.ContainerFilters}>
+          <RectButton onPress={() => handleFilters()} style={styles.buttonFilters} >
 
-          <Text style={styles.textHeader}>
-            Gestor Acadêmico Redentor - Itaperuna
-          </Text>
-          <Text style={styles.textHeader2}>
-            {horario}, {Name}
-          </Text>
+            <View style={styles.ViewFilters}>
+              <View style={styles.ViewFiltersIconText}>
+                <Feather name='filter' size={20} color="#D8D8D8" />
+                <Text style={styles.filtersText} >Filtrar por dia, disciplina e docente</Text>
+              </View>
+              <Ionicons name='ios-arrow-down' size={20} color="#58B6B6" />
+            </View>
+
+          </RectButton>
+
+          {
+            User.provider === "2" && (
+              <RectButton style={styles.BotaoAdd} onPress={() => { navigation.navigate("NewSolicitacao") }} >
+                <FontAwesome5 name='plus' size={20} color="#D8D8D8" />
+              </RectButton>
+            )
+          }
+
         </View>
 
-        <View style={styles.ViewDados}>
-          <View style={styles.ViewTextHeader}>
-            <Text style={styles.TextHeaderDados}>Solicitações</Text>
-          </View>
+        {isFiltersVisible && (
+          <View style={styles.serachForm} >
+            <Text style={styles.label} >
+              Disciplina
+            </Text>
 
-          <View>
-            <View style={styles.ViewFiltro}>
-              <Text style={styles.textDescricao}>Status: </Text>
-              <View style={[styles.ViewInput, styles.ViewStatusSelect]}>
-                <Picker
-                  style={styles.input}
-                  selectedValue={selectedValue}
-                  onValueChange={(itemValue, itemIndex) =>
-                    setSelectedValue(itemValue)
-                  }
-                  itemStyle={{ fontSize: 7 }}
-                >
-                  <Picker.Item label="Todos" value="Todos" />
-                  <Picker.Item label="Atendida" value="ATENDIDA" />
-                  <Picker.Item label="Pendente" value="PENDENTE" />
-                  <Picker.Item label="Andamento" value="ANDAMENTO" />
-                </Picker>
-              </View>
-              <Text style={styles.textDocente}>Docente: </Text>
-              <View style={[styles.ViewInput, styles.ViewDisciplina]}>
-                <TextInput
-                  style={styles.textInput}
-                  value={filterText}
-                  autoCorrect={false}
-                  onChangeText={(value) => setFilterText(value)}
-                />
-              </View>
+            <View style={styles.inputPicker} >
+              <Picker
+                selectedValue={subject}
+                style={{
+                  width: "100%"
+                }}
+                itemStyle={{
+                  fontSize: 10,
+                  fontFamily: 'Poppins_400Regular'
+                }}
+                onValueChange={(itemValue) => { setSubject(itemValue) }}
+              >
+                <Picker.Item color='#c1bccc' label="Selecione" value="" />
+                {
+
+                  solictacoes.map((disciplina, index) => {
+
+                    return (
+                      <Picker.Item key={index} color='#c1bccc' label={`${disciplina.disciplina}`} value={`${disciplina.disciplina}`} />
+                    )
+                  })
+                }
+              </Picker>
+
             </View>
 
-            <View style={styles.ViewFiltro}>
-              <Text style={styles.textDescricao}>Data: </Text>
-              <View style={[styles.ViewInput, styles.ViewData]}>
-                <TextInput
-                  style={styles.textInput}
-                  value={""}
-                  autoCorrect={false}
-                  onChangeText={() => {}}
-                />
-              </View>
-              <Text style={styles.textDisciplina}>Disciplina: </Text>
-              <View style={[styles.ViewInput, styles.ViewDocente]}>
-                <TextInput
-                  style={styles.textInput}
-                  value={""}
-                  autoCorrect={false}
-                  onChangeText={() => {}}
-                />
-              </View>
-            </View>
 
-            <View style={styles.ViewFiltro}>
-              <TouchableOpacity
-                style={[styles.btnbarrapesquisa, styles.corbtn1]}
-                onPress={() => ClearFilter()}
-              >
-                <FontAwesome5 name="backspace" size={12} color="#525252" />
-                <Text style={styles.textBtn}>Limpar</Text>
-              </TouchableOpacity>
+            <View style={styles.inputGroup} >
 
-              <TouchableOpacity
-                style={[styles.btnbarrapesquisa, styles.corbtn2]}
-                onPress={() => searchList()}
-              >
-                <FontAwesome5 name="search" size={12} color="#fff" />
-                <Text style={[styles.textBtn, styles.textBtnNovo]}>
-                  Consultar
+              <View style={styles.inputBlock} >
+                <Text style={styles.label} >
+                  Docente
                 </Text>
-              </TouchableOpacity>
+                <View style={styles.inputPicker} >
+                  <Picker
+                    selectedValue={weekDay}
+                    style={{
+                      width: "100%"
+                    }}
+                    itemStyle={{
+                      fontSize: 10,
+                      fontFamily: 'Poppins_400Regular'
+                    }}
+                    onValueChange={(itemValue) =>
+                      setWeekDay(itemValue)
+                    }
+                  >
+                    <Picker.Item color='#c1bccc' label="Selecione" value="" />
+                    {
+
+                      solictacoes.map((docente, index) => {
+
+                        return (
+                          <Picker.Item key={index} color='#c1bccc' label={`${docente.professor}`} value={`${docente.professor}`} />
+                        )
+                      })
+                    }
+                  </Picker>
+                </View>
+
+              </View>
+
+              <View style={styles.inputBlock} >
+                <Text style={styles.label} >
+                  Data
+                </Text>
+                <TextInput
+                  value={time}
+                  style={styles.input}
+                  placeholder='Qual horário'
+                  placeholderTextColor='#c1bccc'
+                  onChangeText={(text) => setTime(text)}
+                />
+
+              </View>
             </View>
-          </View>
 
-          <View style={styles.viewRecurso}>
-            <Text style={styles.textRecurso}>Solicitações</Text>
           </View>
+        )}
 
-          {inReload ? (
-            <View style={styles.viewFlatList}>
+
+
+      </View>
+
+
+      <ScrollView
+        style={styles.SolicitacoesList}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingBottom: 6
+        }}
+      >
+
+        {
+          inReload ? (
+            <View style={styles.Activity}>
               <ActivityIndicator
                 size="large"
                 color="#087E85"
@@ -250,24 +264,15 @@ export default function Solicitacao({ navigation: { goBack, navigate } }) {
                 }}
               />
             </View>
-          ) : (
-            <SafeAreaView style={styles.viewFlatList}>
-              <FlatList
-                data={solictacoes}
-                keyExtractor={(item) => item._id}
-                scrollEnabled={false}
-                renderItem={({ item }) => (
-                  <View>
-                    <Item item={item} />
-                  </View>
-                )}
-              />
-            </SafeAreaView>
-          )}
-        </View>
+          ) :
+            inMemorySolicitacoes.map((item, index) => {
+              return (
+                <Item key={item._id} item={item} />
+              )
+            })
+        }
 
-        <BtnVoltar destino={"Dashboard"} />
-      </KeyboardAvoidingView>
-    </ScrollView>
+      </ScrollView>
+    </Background>
   );
 }

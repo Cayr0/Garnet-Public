@@ -1,26 +1,37 @@
-import React, { useState, useContext, createContext} from 'react';
+import React, { useState, useContext, createContext, useEffect } from "react";
+import { AsyncStorage } from "react-native";
 
-const UserContext = createContext()
+const UserContext = createContext();
 
 export default function UserProvider({ children }) {
+  const [User, setUser] = useState([]);
+  const [UserToken, setUserToken] = useState("");
 
-  const [User,setUser] = useState([])
+  async function signOut() {
+    await AsyncStorage.removeItem("@token");
+    await AsyncStorage.removeItem("user");
+    setUser([]);
+  }
 
-  return(
+  return (
     <UserContext.Provider
       value={{
         User,
-        setUser
+        setUser,
+        signOut,
+        UserToken,
+        setUserToken
       }}
     >
       {children}
     </UserContext.Provider>
-  )
+  );
 }
 
 export function useUser() {
   const context = useContext(UserContext);
-  if (!context) throw new Error("useUser must be used within a Context.Provider");
-  const { User, setUser } = context
-  return { User, setUser };
+  if (!context)
+    throw new Error("useUser must be used within a Context.Provider");
+  const { User, setUser, signOut, setUserToken, UserToken } = context;
+  return { User, setUser, signOut, setUserToken, UserToken };
 }

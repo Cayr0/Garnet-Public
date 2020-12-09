@@ -4,340 +4,200 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: '#F1F1F1',
   },
-  container2: {
-    justifyContent: 'center',
+
+  /*------- FILTROS ---------*/
+  ContentFilters: {
+    width: "100%",
+    backgroundColor: "#087E85",
+    alignItems: "center",
+    paddingBottom: 30,
+    paddingTop: 60,
+    // height: 300,
+  },
+
+  ContainerFilters: {
+    flexDirection: "row",
+    justifyContent: "center",
+    // backgroundColor: "#6262"
+  },
+
+  buttonFilters: {
+    marginBottom: 20,
+    width: "75%",
+    // marginTop: 40,
+  },
+
+  ViewFilters: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 40,
+    borderBottomWidth: 1,
+    borderBottomColor: '#58B6B6',
+  },
+
+  ViewFiltersIconText: {
+    flexDirection: 'row',
     alignItems: 'center'
   },
-  header: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    marginTop: '10%',
-    marginBottom: '5%'
+
+  filtersText: {
+    fontFamily: 'Poppins_400Regular',
+    fontSize: 15,
+    color: '#58B6B6',
+    lineHeight: 20,
+    marginLeft: 15
   },
-  textHeader: {
-    textAlign: 'center',
-    color: '#087E85',
-    fontFamily: 'Roboto',
-    fontStyle: 'normal',
-    fontWeight: 'bold',
-    fontSize: 16,
-    lineHeight: 19,
-    marginTop: '2%',
-  },
-  textHeader2: {
-    textAlign: 'center',
-    color: '#087E85',
-    fontFamily: 'Roboto',
-    fontStyle: 'normal',
-    fontSize: 16,
-    lineHeight: 19,
-    marginTop: '1%',
-  },
-  
-  ViewDados: {
-    flex: 1.5,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    // borderColor: '#ABABAB',
-    // borderWidth: 0.5,
-    width:'97%',
+
+  BotaoAdd: {
+    width: "12.5%",
+    marginLeft: "2.5%",
+    backgroundColor: "#58B6B6",
     borderRadius: 8,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  ViewTextHeader: {
-    alignItems: 'flex-start',
-    width: '100%',
-    
-    top: -13
+
+  serachForm: {
+    marginBottom: 24,
+    width: "80%"
   },
-  TextHeaderDados: {
-    backgroundColor:'#fff',
-    borderColor: '#ABABAB',
-    borderWidth: 0.5,
-    borderRadius: 5,
-    color: '#525252',
-    padding: 5,
+
+  label: {
+    color: '#58B6B6',
+    fontFamily: 'Poppins_400Regular',
   },
-  Descricao: {
-    flexDirection: 'row',
-    padding: 7,
-  },
-  ViewFiltro: {
-    flexDirection: 'row',
-    justifyContent:'center',
-    alignItems: 'center',
-    marginBottom: 8,
-    width: '97%'
-  },
+
   input: {
-    borderColor: '#ABABAB',
-    borderWidth: 0.5,
+    height: 50,
+    backgroundColor: '#fff',
     borderRadius: 8,
-    width: '100%',
-    padding: 0,
-    color:'#525252',
-    height: 33,
-  },
-  ViewInput: {
-    borderColor: '#ABABAB',
-    borderWidth: 0.5,
-    borderRadius: 8,
-    alignItems: 'flex-start',
     justifyContent: 'center',
-  },
-
-  textInput: {
-    borderColor: '#ABABAB',
-    borderWidth: 0.5,
-    borderRadius: 8,
-    width: '100%',
-    fontSize: 13,
-    padding: 3,
-  },
-
-  ViewData: {
-    flex: 0.4
-  },
-  ViewDocente: {
-    flex: 1
-  },
-  ViewStatusSelect: {
-    flex: 0.8
-  },
-  ViewDisciplina: {
-    flex: 0.8
-  },
-  textDescricao: {
-    fontSize: 14,
-    color: '#525252'
-  },
-  textDocente: {
-    fontSize: 14,
-    color: '#525252',
-    marginLeft: 6,
-  },
-  textDisciplina: {
-    fontSize: 14,
-    color: '#525252',
-    marginLeft: 6,
-  },
-  btnheader: {
-    flex: 1,
-    flexDirection: "row",
-  },
-  btnbarrapesquisa: {
-    flexDirection: 'row',
-    borderRadius: 8,
-    alignItems:'center',
-    justifyContent:'center',
-    width: 120,
-    height: 35,
-    margin: 5,
-  },
-  corbtn1: {
-    backgroundColor:'#E4E4E4',
-  },
-  corbtn2: {
-    backgroundColor:'#108B93',
-  },
-  textBtn: {
-    marginLeft: 6,
+    paddingHorizontal: 10,
+    marginTop: 4,
+    marginBottom: 16,
     fontSize: 16,
-    color: '#525252',
-  },
-  textBtnNovo: {
-    color: '#fff',
+    color: '#c1bccc',
   },
 
-  viewRecurso: {
+  inputPicker: {
+    height: 50,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    justifyContent: 'center',
+    paddingHorizontal: 0,
+    marginTop: 4,
+    marginBottom: 16
+  },
+
+  inputGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+
+  inputBlock: {
+    width: '48%'
+  },
+
+
+
+
+  /*------- FILTROS ---------*/
+  SolicitacoesList: {
+    marginTop: 20,
     flex: 1,
-    borderColor: '#ABABAB',
-    borderWidth: 0.5,
-    width:'97%',
-    borderRadius: 5,
-    padding:5,
-    backgroundColor: '#F5F5F5'
-  },
-
-  textRecurso: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color:'#525252',
+    width: "100%",
+    // backgroundColor: "#6363",
   },
 
   viewFlatList: {
     flex: 1,
-    //borderColor: '#ABABAB',
-    //borderWidth: 0.5,
-    width:'99%',
-    //borderRadius: 5,
-    
-    padding:5,
-    backgroundColor: '#fff'
+    // width: "100%",
   },
-  barraDescricao: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    
+  Activity: {
+    flex: 1,
+    marginTop: 60
   },
-  /*Styles Flatlist*/
+  /*--------Styles Flatlist---------*/
   flatList: {
-    flexDirection: 'row',
-    // justifyContent: 'space-between',
-    height: 94,
-    borderColor: '#E4E4E4',
+    backgroundColor: '#FFF',
     borderWidth: 1,
-    backgroundColor: '#F5F5F5'
+    borderColor: '#e6e6f0',
+    borderRadius: 8,
+    marginBottom: 16,
+    overflow: 'hidden',
+    // height: 286,
+    flex: 1,
+    paddingVertical: 15,
   },
 
   /*Styles Dentro do Flatlist*/
   ViewProfessor: {
     flexDirection: "column",
-    //backgroundColor: '#3a3a',
-    padding: 3,
-    width: 65
+    paddingHorizontal: 24,
   },
   textProfessor: {
-    fontWeight: 'bold',
-    color: '#525252',
-    fontSize: 11,
-    fontFamily: "Roboto",
+    color: '#2F2F2F',
+    fontSize: 20,
+    fontFamily: "Poppins_600SemiBold",
   },
-  textNomeProfessor: {
-    fontWeight: 'normal',
+  textDisciplina: {
     color: '#525252',
-    fontSize: 11,
-    fontFamily: "Roboto",
+    fontSize: 12,
+    fontFamily: "Poppins_400Regular",
   },
   //-------------------
   ViewDate: {
     flexDirection: "column",
-    //backgroundColor: '#3a3b',
-    padding: 3,
-    width: 80,
-    marginLeft: 2
-  },
-  textDateSolicitacao: {
-    marginTop: 5,
-    fontWeight: 'bold',
-    color: '#525252',
-    fontSize: 11,
-    fontFamily: "Roboto",
+    paddingHorizontal: 24,
+    paddingVertical: 14,
   },
   textDate: {
-    fontWeight: 'bold',
     color: '#525252',
-    fontSize: 11,
-    fontFamily: "Roboto",
-  },
-  textNDate: {
-    fontWeight: 'normal',
-    color: '#525252',
-    fontSize: 11,
-    fontFamily: "Roboto",
+    fontSize: 14,
+    fontFamily: "Poppins_400Regular",
   },
   //------------------------
   ViewHorario: {
-    flexDirection: "column",
-    //backgroundColor: '#3a3a',
-    padding: 3,
-    width: 125,
-    marginLeft: 2
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 24,
+    // paddingVertical: 14,
   },
   textHorario: {
-    fontWeight: 'bold',
     color: '#525252',
-    fontSize: 11,
-    fontFamily: "Roboto",
-  },
-  textNomeHorario: {
-    fontWeight: 'normal',
-    color: '#525252',
-    fontSize: 11,
-    fontFamily: "Roboto",
-  },
-  //------------------------
-  ViewSala: {
-    flexDirection: "column",
-    //backgroundColor: '#3a3a',
-    padding: 3,
-    width: 40,
-    marginLeft: 2
-  },
-  textSala: {
-    fontWeight: 'bold',
-    color: '#525252',
-    fontSize: 11,
-    fontFamily: "Roboto",
-  },
-  textNomeSala: {
-    fontWeight: 'normal',
-    color: '#525252',
-    fontSize: 11,
-    fontFamily: "Roboto",
+    fontSize: 14,
+    fontFamily: "Poppins_400Regular",
   },
   //------------------------
   ViewStts: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
     flexDirection: "column",
-    padding: 3,
-    marginLeft: 2
-    
-  },
-  ViewNomeStts: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: "70%",
-  },
-  textStts: {
-    fontWeight: 'bold',
-    color: '#525252',
-    fontSize: 11,
-    fontFamily: "Roboto",
-    
   },
 
   //Variavel de Status
   CircleRed: {
-    width:20,
-    height:20,
-    borderRadius: 50,
-    borderWidth: 10,
-    borderColor: "#E51111",
+    width: 30,
+    height: 30,
+    borderTopLeftRadius: 8,
+    backgroundColor: "#E51111",
   },
   CircleBlue: {
-    width:20,
-    height:20,
-    borderRadius: 50,
-    borderWidth: 10,
-    borderColor: "#3690E9",
+    width: 30,
+    height: 30,
+    borderTopLeftRadius: 8,
+    backgroundColor: "#3690E9",
   },
   CircleGreen: {
-    width:20,
-    height:20,
-    borderRadius: 50,
-    borderWidth: 10,
-    borderColor: "#12A93B",
-  },
-
-
-  //Botão de Voltar
-  btnVoltarView: {
-    justifyContent: 'center',
-    margin: '15%',
-    width: '50%'
-  },
-  btnVoltar: {
-    backgroundColor:'#E4E4E4',
-    borderRadius: 8,
-    alignItems:'center',
-    justifyContent:'center',
-    height: 45,
-  },
-  textVoltar: {
-    fontSize: 16,
-    color: '#525252',
+    width: 30,
+    height: 30,
+    borderTopLeftRadius: 8,
+    backgroundColor: "#12A93B",
   },
 });
 

@@ -10,32 +10,38 @@ import Solicitacao from '../pages/adm/solicitacoes/index';
 import EditarRecurso from '../pages/adm/cadastro-recurso/ComponenteRecursos/editar/index';
 import CadastrarRecurso from '../pages/adm/cadastro-recurso/ComponenteRecursos/cadastrar';
 import EditarSolicitacao from '../pages/adm/solicitacoes/ComponenteRecursos/editar/index';
+import NewSolicitacao from '../pages/adm/solicitacoes/ComponenteRecursos/newsolicitacao/index';
 
 const { Navigator, Screen } = createStackNavigator();
+
+const config = { headerTransparent: true, headerTitle: null, headerLeft: null }
 
 function AdmStack() {
   return (
     <Navigator initialRouteName={Dashboard}>
-      <Screen name="Dashboard" component={Dashboard} 
-        options={{ headerTransparent: true, headerTitle: null, }}
+      <Screen name="Dashboard" component={Dashboard}
+        options={config}
       />
-      <Screen name="Perfil" component={Perfil} 
-        options={{ headerTransparent: true, headerTitle: null, }}
+      <Screen name="Perfil" component={Perfil}
+        options={config}
       />
-      <Screen name="Cadastro" component={Cadastro} 
-        options={{ headerTransparent: true, headerTitle: null, }}
+      <Screen name="Cadastro" component={Cadastro}
+        options={config}
       />
-      <Screen name="Solicitacao" component={Solicitacao} 
-        options={{ headerTransparent: true, headerTitle: null, }}
+      <Screen name="Solicitacao" component={Solicitacao}
+        options={config}
       />
-      <Screen name="EditarSolicitacao" component={EditarSolicitacao} 
-        options={{ headerTransparent: true, headerTitle: null, }}
+      <Screen name="EditarSolicitacao" component={EditarSolicitacao}
+        options={config}
       />
-      <Screen name="EditarRecurso" component={EditarRecurso} 
-        options={{ headerTransparent: true, headerTitle: null, }}
+      <Screen name="NewSolicitacao" component={NewSolicitacao}
+        options={config}
       />
-      <Screen name="CadastrarRecurso" component={CadastrarRecurso} 
-        options={{ headerTransparent: true, headerTitle: null, }}
+      <Screen name="EditarRecurso" component={EditarRecurso}
+        options={config}
+      />
+      <Screen name="CadastrarRecurso" component={CadastrarRecurso}
+        options={config}
       />
     </Navigator>
   );
